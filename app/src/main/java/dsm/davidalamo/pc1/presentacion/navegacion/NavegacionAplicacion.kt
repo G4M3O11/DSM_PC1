@@ -15,6 +15,7 @@ import dsm.davidalamo.pc1.presentacion.acceso.VistaInicioSesion
 import dsm.davidalamo.pc1.presentacion.acceso.VistaRegistroCuenta
 import dsm.davidalamo.pc1.presentacion.jugada.VistaJugada
 import dsm.davidalamo.pc1.presentacion.sorteo.VistaSorteo
+import dsm.davidalamo.pc1.datos.remoto.RepositorioAutenticacion
 
 object Rutas {
     const val INICIO_SESION = "inicio_sesion"
@@ -24,12 +25,16 @@ object Rutas {
 }
 
 @Composable
-fun NavegacionAplicacion() {
+fun NavegacionAplicacion(
+    iniciarSesion: suspend (String, String) -> String = RepositorioAutenticacion::iniciarSesion,
+    registrarCuenta: suspend (String, String) -> String = RepositorioAutenticacion::registrarCuenta
+) {
     val controladorNavegacion = rememberNavController()
     NavHost(controladorNavegacion, startDestination = Rutas.INICIO_SESION) {
         composable(Rutas.INICIO_SESION) {
             VistaInicioSesion(
                 alIngresar = { controladorNavegacion.abrirJugada() },
+                iniciarSesion = iniciarSesion,
                 alCrearCuenta = {
                     controladorNavegacion.navigate(Rutas.REGISTRO_CUENTA) { launchSingleTop = true }
                 }
@@ -38,6 +43,7 @@ fun NavegacionAplicacion() {
         composable(Rutas.REGISTRO_CUENTA) {
             VistaRegistroCuenta(
                 alContinuar = { controladorNavegacion.abrirJugada() },
+                registrarCuenta = registrarCuenta,
                 alVolver = { controladorNavegacion.popBackStack() }
             )
         }
@@ -78,6 +84,7 @@ private fun NavHostController.abrirJugada() {
 }
 
 private fun NavHostController.volverAlInicio() {
+    RepositorioAutenticacion.cerrarSesion()
     navigate(Rutas.INICIO_SESION) {
         popUpTo(graph.id) { inclusive = true }
         launchSingleTop = true

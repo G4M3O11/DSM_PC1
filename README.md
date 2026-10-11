@@ -54,12 +54,12 @@ DSM_PC1/
 
 | Pantalla | Función |
 |---|---|
-| `VistaInicioSesion` | Formulario ilustrativo y acceso al prototipo sin credenciales. |
-| `VistaRegistroCuenta` | Formulario ilustrativo, volver al inicio y continuar a la jugada. |
+| `VistaInicioSesion` | Inicio de sesión real con correo y contraseña en Firebase Auth. |
+| `VistaRegistroCuenta` | Creación de cuenta real y acceso con el UID devuelto por Firebase Auth. |
 | `VistaJugada` | Selección de seis números del **1 al 45** y registro real en Firestore. |
 | `VistaSorteo` | Bolillas en tiempo real, jugada almacenada, aciertos y resultado final. |
 
-**Alcance actual:** navegación, registro de jugadas y seguimiento real en Firestore. Los formularios de correo y contraseña siguen siendo ilustrativos, a cargo del compañero responsable de autenticación. Al abrir Mi jugada se reutiliza la sesión de Firebase Auth existente; si no hay sesión, se inicia una **sesión anónima temporal**.
+**Alcance actual:** autenticación con correo y contraseña, registro de jugadas y seguimiento real en Firestore. El formulario llama a Firebase Auth y navega solo si la autenticación tiene éxito. Mi jugada utiliza `FirebaseAuth.currentUser.uid`, correspondiente al usuario que retorna Auth. No se inicia autenticación anónima ni se fija un UID manualmente.
 
 Las cuatro interfaces tienen vistas previas en `presentacion/VistasPrevias.kt`, visibles en el panel **Design / Split** de Android Studio.
 
@@ -68,7 +68,7 @@ Las cuatro interfaces tienen vistas previas en `presentacion/VistasPrevias.kt`, 
 ```text
 Inicio de sesión ── Crear cuenta ── Registro de cuenta
        │                                   │
-       └── Ingresar al prototipo           └── Continuar al prototipo
+       └── Iniciar sesión                  └── Registrar cuenta
                     │                                  │
                     └────────── Mi jugada ──────────────┘
                                     │
@@ -77,7 +77,7 @@ Inicio de sesión ── Crear cuenta ── Registro de cuenta
                                   Sorteo
 ```
 
-**Volver** desde registro regresa al inicio. Desde sorteo se vuelve a la jugada, también mediante el botón Atrás de Android. **Salir** desde jugada o sorteo regresa al inicio y limpia la pila de navegación. Al entrar al prototipo se retiran las vistas de acceso de la pila.
+**Volver** desde registro regresa al inicio. Desde sorteo se vuelve a la jugada, también mediante el botón Atrás de Android. **Salir** cierra Firebase Auth, regresa al inicio y limpia la pila de navegación. Al autenticar se retiran las vistas de acceso de la pila.
 
 ### Arquitectura adaptada de `script_base.md`
 
@@ -111,7 +111,7 @@ Se conservan los nombres de APIs de Android, Compose, Gradle y otras dependencia
 bash ./gradlew :app:assembleDebug :app:testDebugUnitTest
 ```
 
-Con un emulador o dispositivo conectado, las pruebas de navegación recorren las cuatro vistas, los accesos sin credenciales, el regreso y la salida:
+Con un emulador o dispositivo conectado, las pruebas recorren las cuatro vistas, el acceso, el regreso y la salida. Los tests de interfaz usan operaciones de autenticación inyectadas, sin credenciales reales ni creación de cuentas remotas:
 
 ```bash
 bash ./gradlew :app:connectedDebugAndroidTest
@@ -122,7 +122,7 @@ bash ./gradlew :app:connectedDebugAndroidTest
 ### Preparación en la consola
 
 1. Verifica que `app/google-services.json` corresponda al proyecto Firebase de la app `dsm.davidalamo.pc1`.
-2. En **Authentication → Sign-in method**, habilita **Anonymous / Anónimo**. Esta opción no conecta ni modifica los formularios del compañero. Si su módulo ya inició sesión, el registro utiliza ese mismo UID.
+2. En **Authentication → Sign-in method**, habilita **Email/Password**. Ingresa con una cuenta existente o créala desde Registrar cuenta. La autenticación anónima ya no es necesaria.
 3. Crea Cloud Firestore en la base de datos predeterminada.
 4. Publica el contenido de `firestore.rules` en **Firestore → Reglas**.
 5. Crea la cabecera **`sorteos/actual`**:
@@ -164,9 +164,9 @@ En **Mi jugada**, espera la carga de la cabecera y el UID. Toca números para se
 
 La selección se conserva durante rotaciones mediante el ViewModel; no se persiste antes de confirmar. La transacción vuelve a verificar en el servidor que el sorteo esté abierto y que no exista `jugadas/{uid}`. Las reglas validan UID, relación, seis enteros únicos, rango y fecha del servidor, y rechazan modificaciones y eliminaciones desde la app.
 
-**Salir** sigue siendo una acción de navegación, no cierra Firebase Auth: conserva el UID anónimo entre visitas y evita crear usuarios nuevos por cada ingreso. El compañero debe integrar su cierre de sesión explícito cuando implemente autenticación. Para dos participantes temporales usa dos dispositivos/emuladores: cada uno obtiene un UID propio. Si el compañero inicia una sesión distinta con Mi jugada abierta, usa **Actualizar participación** tras el error de sesión o vuelve a entrar.
+**Salir** cierra la sesión de Firebase Auth. Para demostrar dos participantes usa dos cuentas distintas en dos dispositivos/emuladores. Al ingresar de nuevo con la misma cuenta se recupera el mismo UID y su jugada. Las jugadas creadas anteriormente con UID anónimo no se trasladan automáticamente a una cuenta con correo; cada documento permanece asociado a su UID original.
 
-Si no hay conexión, falta la cabecera, no está habilitado Anónimo o las reglas deniegan acceso, se muestra el error y un botón de reintento. No se presentan datos de caché como confirmación de registro. Publicar reglas y configurar Firebase es un paso manual; el código no modifica el proyecto remoto.
+Si no hay conexión, falta la cabecera o las reglas deniegan acceso, se muestra el error y un botón de reintento. Las credenciales incorrectas se muestran como error en el formulario y no permiten avanzar. No se presentan datos de caché como confirmación de registro. Publicar reglas y configurar Firebase es un paso manual; el código no modifica el proyecto remoto.
 
 ## Seguimiento en tiempo real y demostración
 
@@ -180,7 +180,7 @@ La cabecera debe tener identificador válido, nombre, fecha timestamp y estado v
 
 ### Demostración obligatoria con dos participantes
 
-Usa dos emuladores o dispositivos con usuarios Firebase Auth distintos, conectados al **mismo proyecto** y al documento **`sorteos/actual`**. Verifica los UID en Mi jugada: deben ser diferentes. La autenticación anónima actual permite dos usuarios distintos; si la evaluación exige cuentas con correo y contraseña, integra primero el módulo del compañero. El repositorio reutiliza cualquier sesión que ese módulo haya iniciado.
+Usa dos emuladores o dispositivos con cuentas de correo Firebase Auth distintas, conectadas al **mismo proyecto** y al documento **`sorteos/actual`**. Verifica los UID en Mi jugada: deben coincidir con Authentication en la consola y ser diferentes entre participantes.
 
 1. Con `estado: abierto` y sin bolillas publicadas, registra y confirma estas jugadas:
 
@@ -203,7 +203,7 @@ Usa dos emuladores o dispositivos con usuarios Firebase Auth distintos, conectad
 
 4. **Después de la quinta bolilla**, muestra que A y B tienen **5 de 6 aciertos**, sin resultado definitivo.
 5. Publica la sexta (`41`): A debe tener 6 aciertos y B 5, todavía sin resultado mientras siga `en_curso`. Cambia la cabecera a `estado: finalizado`: A verá **GANADOR** y B **SIGUE INTENTANDO**. No agregues esos textos a ningún documento. Si finalizas antes de recibir la sexta, la app espera resultados.
-6. Cierra y vuelve a abrir la app en uno de los dispositivos, sin borrar sus datos ni cerrar la sesión Firebase. Ingresa nuevamente y abre **Ver sorteo**. Deben recuperarse el mismo UID, la jugada, las seis bolillas y el resultado recalculado. No reinstales ni elimines la cuenta anónima: eso puede cambiar el participante.
+6. Cierra y vuelve a abrir la app en uno de los dispositivos. Ingresa nuevamente con la misma cuenta y abre **Ver sorteo**. Deben recuperarse el mismo UID, la jugada, las seis bolillas y el resultado recalculado.
 
 La evidencia debe incluir la consola durante **cada publicación individual**, las dos pantallas actualizadas, la comprobación tras la quinta bolilla, el cambio a finalizado y la recuperación tras reiniciar. Las pruebas automatizadas de cálculo y UI no sustituyen esta demostración conectada a Firebase.
 

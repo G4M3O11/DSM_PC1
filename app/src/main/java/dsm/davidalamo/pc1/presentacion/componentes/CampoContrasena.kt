@@ -19,7 +19,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 fun CampoContrasena(
     valor: String,
     alCambiarValor: (String) -> Unit,
-    etiqueta: String = "Contraseña"
+    etiqueta: String = "Contraseña",
+    habilitado: Boolean = true
 ) {
     var esVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -28,6 +29,7 @@ fun CampoContrasena(
         modifier = Modifier.fillMaxWidth(),
         label = { Text(etiqueta) },
         singleLine = true,
+        enabled = habilitado,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         visualTransformation = if (esVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {

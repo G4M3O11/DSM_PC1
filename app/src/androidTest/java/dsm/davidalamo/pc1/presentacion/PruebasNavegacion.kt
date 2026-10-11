@@ -5,6 +5,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import androidx.activity.compose.setContent
+import dsm.davidalamo.pc1.presentacion.navegacion.NavegacionAplicacion
+import dsm.davidalamo.pc1.ui.tema.TemaBolilla
 import dsm.davidalamo.pc1.ActividadPrincipal
 import org.junit.Rule
 import org.junit.Test
@@ -14,7 +18,23 @@ class PruebasNavegacion {
     val reglaComposicion = createAndroidComposeRule<ActividadPrincipal>()
 
     private fun mostrarAplicacion() {
+        reglaComposicion.runOnUiThread {
+            reglaComposicion.activity.setContent {
+                TemaBolilla {
+                    NavegacionAplicacion(
+                        iniciarSesion = { _, _ -> "usuarioPrueba" },
+                        registrarCuenta = { _, _ -> "usuarioPrueba" }
+                    )
+                }
+            }
+        }
         reglaComposicion.waitForIdle()
+    }
+
+    private fun ingresar() {
+        reglaComposicion.onNodeWithText("Correo electrónico").performTextInput("usuario@example.com")
+        reglaComposicion.onNodeWithText("Contraseña").performTextInput("clavePrueba")
+        pulsarTexto("Iniciar sesión")
     }
 
     private fun pulsarTexto(texto: String) {
@@ -22,9 +42,9 @@ class PruebasNavegacion {
     }
 
     @Test
-    fun recorrerVistasSinCredencialesYSalir() {
+    fun recorrerVistasAutenticadasYSalir() {
         mostrarAplicacion()
-        pulsarTexto("Ingresar al prototipo")
+        ingresar()
         reglaComposicion.onNodeWithText("Elige tus 6 números").performScrollTo().assertIsDisplayed()
         pulsarTexto("Ver sorteo")
         reglaComposicion.onNodeWithText("Seguimiento del sorteo").assertIsDisplayed()
@@ -42,14 +62,17 @@ class PruebasNavegacion {
         reglaComposicion.onNodeWithText("Volver").performClick()
         reglaComposicion.onNodeWithText("Tu suerte empieza aquí").assertIsDisplayed()
         pulsarTexto("Crear cuenta")
-        pulsarTexto("Continuar al prototipo")
+        reglaComposicion.onNodeWithText("Correo electrónico").performTextInput("usuario@example.com")
+        reglaComposicion.onNodeWithText("Contraseña").performTextInput("clavePrueba")
+        reglaComposicion.onNodeWithText("Confirmar contraseña").performTextInput("clavePrueba")
+        pulsarTexto("Registrar cuenta")
         reglaComposicion.onNodeWithText("Elige tus 6 números").performScrollTo().assertIsDisplayed()
     }
 
     @Test
     fun salirDesdeSorteoLimpiaLaPila() {
         mostrarAplicacion()
-        pulsarTexto("Ingresar al prototipo")
+        ingresar()
         pulsarTexto("Ver sorteo")
         reglaComposicion.onNodeWithText("Salir").performClick()
         reglaComposicion.onNodeWithText("Tu suerte empieza aquí").assertIsDisplayed()
@@ -61,7 +84,7 @@ class PruebasNavegacion {
     @Test
     fun retrocesoDelSistemaVuelveDesdeSorteoAJugada() {
         mostrarAplicacion()
-        pulsarTexto("Ingresar al prototipo")
+        ingresar()
         pulsarTexto("Ver sorteo")
         reglaComposicion.waitForIdle()
         reglaComposicion.runOnUiThread {

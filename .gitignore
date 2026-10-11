@@ -47,4 +47,4 @@ ehthumbs.db
 Thumbs.db
 
 script_base.md
-google-services.json
+app/google-services.json

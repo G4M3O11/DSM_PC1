@@ -21,10 +21,9 @@ class RepositorioJugadas {
     private val documentoSorteo = baseDatos.collection("sorteos").document(IDENTIFICADOR_SORTEO)
 
     suspend fun cargarParticipacion(): DatosParticipacion {
-        // Conserva la sesion que provea el modulo de autenticacion.
         val usuario = autenticacion.currentUser
-            ?: autenticacion.signInAnonymously().await().user
-            ?: error("No se pudo iniciar la sesión anónima.")
+            ?: error("Inicia sesión con tu cuenta antes de registrar una jugada.")
+        check(!usuario.isAnonymous) { "La sesión es anónima. Sal e inicia sesión con tu correo y contraseña." }
         val sorteo = documentoSorteo.get(Source.SERVER).await().leerSorteo()
         val documentoJugada = documentoSorteo.collection("jugadas").document(usuario.uid)
             .get(Source.SERVER).await()
