@@ -23,6 +23,7 @@ fun ContenedorVista(
     titulo: String,
     alVolver: (() -> Unit)? = null,
     alSalir: (() -> Unit)? = null,
+    aviso: String = "Prototipo de navegación · Sin conexión a Firebase",
     contenido: @Composable ColumnScope.() -> Unit
 ) {
     Scaffold(
@@ -44,7 +45,7 @@ fun ContenedorVista(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Prototipo de navegación · Sin conexión a Firebase",
+                aviso,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary
             )

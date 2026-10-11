@@ -14,8 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import dsm.davidalamo.pc1.R
 import dsm.davidalamo.pc1.presentacion.componentes.CampoContrasena
 import dsm.davidalamo.pc1.presentacion.componentes.ContenedorVista
 
@@ -23,7 +25,7 @@ import dsm.davidalamo.pc1.presentacion.componentes.ContenedorVista
 fun VistaInicioSesion(alIngresar: () -> Unit, alCrearCuenta: () -> Unit) {
     var correo by rememberSaveable { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-    ContenedorVista("Bolilla 45") {
+    ContenedorVista(stringResource(R.string.nombre_aplicacion)) {
         Text("Tu suerte empieza aquí", style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold)
         Text("Ingresa para conocer el recorrido de tu jugada.")

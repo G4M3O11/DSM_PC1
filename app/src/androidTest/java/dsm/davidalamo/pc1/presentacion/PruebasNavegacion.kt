@@ -27,7 +27,7 @@ class PruebasNavegacion {
         pulsarTexto("Ingresar al prototipo")
         reglaComposicion.onNodeWithText("Elige tus 6 números").performScrollTo().assertIsDisplayed()
         pulsarTexto("Ver sorteo")
-        reglaComposicion.onNodeWithText("Así se verá tu sorteo").assertIsDisplayed()
+        reglaComposicion.onNodeWithText("Seguimiento del sorteo").assertIsDisplayed()
         pulsarTexto("Volver a mi jugada")
         reglaComposicion.onNodeWithText("Elige tus 6 números").performScrollTo().assertIsDisplayed()
         reglaComposicion.onNodeWithText("Salir").performClick()
