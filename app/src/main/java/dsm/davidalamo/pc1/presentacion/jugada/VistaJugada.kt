@@ -42,8 +42,7 @@ fun VistaJugada(
     var confirmarRegistro by rememberSaveable { mutableStateOf(false) }
     ContenedorVista(
         "Mi jugada",
-        alSalir = if (estado.guardando) null else alSalir,
-        aviso = "Registro de jugadas · Firebase"
+        alSalir = if (estado.guardando) null else alSalir
     ) {
         Text("Elige tus 6 números", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text("Del 1 al 45, sin repetir. Una jugada por usuario y sorteo.")
@@ -68,7 +67,7 @@ fun VistaJugada(
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    if (estado.jugadaRegistrada != null) "Jugada registrada en Firestore"
+                    if (estado.jugadaRegistrada != null) "Jugada confirmada"
                     else "${estado.numerosSeleccionados.size} de 6 seleccionados",
                     style = MaterialTheme.typography.titleMedium
                 )

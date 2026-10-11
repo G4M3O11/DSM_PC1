@@ -1,6 +1,7 @@
 package dsm.davidalamo.pc1.presentacion.componentes
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 
 @Composable
 fun FilaBolillas(numeros: List<Int>, numerosAcertados: Set<Int> = emptySet()) {
@@ -25,10 +28,30 @@ fun FilaBolillas(numeros: List<Int>, numerosAcertados: Set<Int> = emptySet()) {
             val esAcierto = numero in numerosAcertados
             Box(
                 modifier = Modifier.size(40.dp)
+                    .shadow(if (numero != null) 4.dp else 0.dp, CircleShape)
                     .background(
-                        if (esAcierto) MaterialTheme.colorScheme.tertiaryContainer
-                        else if (numero != null) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant,
+                        Brush.verticalGradient(
+                            when {
+                                esAcierto -> listOf(
+                                    MaterialTheme.colorScheme.tertiaryContainer,
+                                    MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                                numero != null -> listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.82f)
+                                )
+                                else -> listOf(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            }
+                        ),
+                        CircleShape
+                    )
+                    .border(
+                        if (esAcierto) 2.dp else 1.dp,
+                        if (esAcierto) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                         CircleShape
                     )
                     .semantics {

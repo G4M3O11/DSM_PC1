@@ -38,7 +38,7 @@ fun VistaInicioSesion(
     var ingresando by remember { mutableStateOf(false) }
     var errorAcceso by remember { mutableStateOf<String?>(null) }
     val alcance = rememberCoroutineScope()
-    ContenedorVista(stringResource(R.string.nombre_aplicacion), aviso = "Acceso con Firebase Authentication") {
+    ContenedorVista(stringResource(R.string.nombre_aplicacion)) {
         Text("Tu suerte empieza aquí", style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold)
         Text("Ingresa para conocer el recorrido de tu jugada.")

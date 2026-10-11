@@ -36,8 +36,7 @@ fun VistaRegistroCuenta(
     var registrando by remember { mutableStateOf(false) }
     var errorRegistro by remember { mutableStateOf<String?>(null) }
     val alcance = rememberCoroutineScope()
-    ContenedorVista("Crear cuenta", alVolver = if (registrando) null else alVolver,
-        aviso = "Registro con Firebase Authentication") {
+    ContenedorVista("Crear cuenta", alVolver = if (registrando) null else alVolver) {
         Text("Únete al sorteo", style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold)
         OutlinedTextField(

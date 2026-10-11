@@ -22,6 +22,8 @@
 
 ## 🛠️ Tecnologías y Requisitos
 
+La identidad visual de Seisora combina azul medianoche, turquesa y dorado, con fondos marfil en modo claro y azul profundo en modo oscuro. Todas las vistas comparten una cabecera con logo vectorial original, tarjetas redondeadas y bolillas con aciertos destacados en dorado. El icono del lanzador utiliza el mismo monograma. Los avisos de prototipo se eliminaron; los errores y estados de conexión reales permanecen visibles.
+
 - **Lenguaje:** Kotlin
 - **UI Framework:** Jetpack Compose (Material 3)
 - **Min SDK:** 34 (Android 14)
