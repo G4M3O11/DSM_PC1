@@ -1,0 +1,67 @@
+package dsm.davidalamo.pc1.presentacion.navegacion
+
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import dsm.davidalamo.pc1.presentacion.acceso.VistaInicioSesion
+import dsm.davidalamo.pc1.presentacion.acceso.VistaRegistroCuenta
+import dsm.davidalamo.pc1.presentacion.jugada.VistaJugada
+import dsm.davidalamo.pc1.presentacion.sorteo.VistaSorteo
+
+object Rutas {
+    const val INICIO_SESION = "inicio_sesion"
+    const val REGISTRO_CUENTA = "registro_cuenta"
+    const val JUGADA = "jugada"
+    const val SORTEO = "sorteo"
+}
+
+@Composable
+fun NavegacionAplicacion() {
+    val controladorNavegacion = rememberNavController()
+    NavHost(controladorNavegacion, startDestination = Rutas.INICIO_SESION) {
+        composable(Rutas.INICIO_SESION) {
+            VistaInicioSesion(
+                alIngresar = { controladorNavegacion.abrirJugada() },
+                alCrearCuenta = {
+                    controladorNavegacion.navigate(Rutas.REGISTRO_CUENTA) { launchSingleTop = true }
+                }
+            )
+        }
+        composable(Rutas.REGISTRO_CUENTA) {
+            VistaRegistroCuenta(
+                alContinuar = { controladorNavegacion.abrirJugada() },
+                alVolver = { controladorNavegacion.popBackStack() }
+            )
+        }
+        composable(Rutas.JUGADA) {
+            VistaJugada(
+                alVerSorteo = {
+                    controladorNavegacion.navigate(Rutas.SORTEO) { launchSingleTop = true }
+                },
+                alSalir = { controladorNavegacion.volverAlInicio() }
+            )
+        }
+        composable(Rutas.SORTEO) {
+            VistaSorteo(
+                alVolver = { controladorNavegacion.popBackStack() },
+                alSalir = { controladorNavegacion.volverAlInicio() }
+            )
+        }
+    }
+}
+
+private fun NavHostController.abrirJugada() {
+    navigate(Rutas.JUGADA) {
+        popUpTo(Rutas.INICIO_SESION) { inclusive = true }
+        launchSingleTop = true
+    }
+}
+
+private fun NavHostController.volverAlInicio() {
+    navigate(Rutas.INICIO_SESION) {
+        popUpTo(graph.id) { inclusive = true }
+        launchSingleTop = true
+    }
+}
