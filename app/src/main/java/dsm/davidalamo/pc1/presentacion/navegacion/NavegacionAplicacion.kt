@@ -1,6 +1,12 @@
 package dsm.davidalamo.pc1.presentacion.navegacion
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import dsm.davidalamo.pc1.presentacion.sorteo.ModeloVistaSorteo
+import dsm.davidalamo.pc1.presentacion.jugada.ModeloVistaJugada
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,7 +42,13 @@ fun NavegacionAplicacion() {
             )
         }
         composable(Rutas.JUGADA) {
+            val modeloVista: ModeloVistaJugada = viewModel()
+            val estado by modeloVista.estado.collectAsStateWithLifecycle()
             VistaJugada(
+                estado = estado,
+                alElegirNumero = modeloVista::alternarNumero,
+                alRegistrar = modeloVista::registrar,
+                alReintentar = modeloVista::cargar,
                 alVerSorteo = {
                     controladorNavegacion.navigate(Rutas.SORTEO) { launchSingleTop = true }
                 },
@@ -44,7 +56,13 @@ fun NavegacionAplicacion() {
             )
         }
         composable(Rutas.SORTEO) {
+            val modeloVista: ModeloVistaSorteo = viewModel()
+            val estado by modeloVista.estado.collectAsStateWithLifecycle(
+                minActiveState = Lifecycle.State.RESUMED
+            )
             VistaSorteo(
+                estado = estado,
+                alReintentar = modeloVista::reintentar,
                 alVolver = { controladorNavegacion.popBackStack() },
                 alSalir = { controladorNavegacion.volverAlInicio() }
             )

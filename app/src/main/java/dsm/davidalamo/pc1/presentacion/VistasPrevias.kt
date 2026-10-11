@@ -5,7 +5,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import dsm.davidalamo.pc1.presentacion.acceso.VistaInicioSesion
 import dsm.davidalamo.pc1.presentacion.acceso.VistaRegistroCuenta
 import dsm.davidalamo.pc1.presentacion.jugada.VistaJugada
+import dsm.davidalamo.pc1.presentacion.jugada.EstadoVistaJugada
 import dsm.davidalamo.pc1.presentacion.sorteo.VistaSorteo
+import dsm.davidalamo.pc1.presentacion.sorteo.EstadoVistaSorteo
 import dsm.davidalamo.pc1.ui.tema.TemaBolilla
 
 @Preview(name = "Inicio de sesion", showBackground = true, widthDp = 360, heightDp = 800)
@@ -23,11 +25,11 @@ private fun VistaPreviaRegistroCuenta() {
 @Preview(name = "Mi jugada", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun VistaPreviaJugada() {
-    TemaBolilla { VistaJugada({}, {}) }
+    TemaBolilla { VistaJugada(EstadoVistaJugada(cargando = false), {}, {}, {}, {}, {}) }
 }
 
 @Preview(name = "Sorteo", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 private fun VistaPreviaSorteo() {
-    TemaBolilla { VistaSorteo({}, {}) }
+    TemaBolilla { VistaSorteo(EstadoVistaSorteo(), {}, {}, {}) }
 }

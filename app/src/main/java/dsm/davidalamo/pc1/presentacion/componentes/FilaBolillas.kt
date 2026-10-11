@@ -18,26 +18,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FilaBolillas(numeros: List<Int>) {
+fun FilaBolillas(numeros: List<Int>, numerosAcertados: Set<Int> = emptySet()) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         repeat(6) { indice ->
             val numero = numeros.getOrNull(indice)
+            val esAcierto = numero in numerosAcertados
             Box(
                 modifier = Modifier.size(40.dp)
                     .background(
-                        if (numero != null) MaterialTheme.colorScheme.primary
+                        if (esAcierto) MaterialTheme.colorScheme.tertiaryContainer
+                        else if (numero != null) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.surfaceVariant,
                         CircleShape
                     )
                     .semantics {
-                        contentDescription = if (numero != null) "Bolilla $numero" else "Bolilla pendiente"
+                        contentDescription = when {
+                            esAcierto -> "Bolilla $numero, acierto"
+                            numero != null -> "Bolilla $numero"
+                            else -> "Bolilla pendiente"
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     numero?.toString() ?: "-",
                     fontWeight = FontWeight.Bold,
-                    color = if (numero != null) MaterialTheme.colorScheme.onPrimary
+                    color = if (esAcierto) MaterialTheme.colorScheme.onTertiaryContainer
+                    else if (numero != null) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

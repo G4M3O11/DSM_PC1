@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{baseDatos}/documents {
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function numeroValido(numero) {
+      return numero is int && numero >= 1 && numero <= 45;
+    }
+
+    function jugadaValida(identificadorSorteo, uidUsuario) {
+      let datos = request.resource.data;
+      return datos.keys().hasAll(['identificadorSorteo', 'uidUsuario', 'numeros', 'fechaRegistro'])
+        && datos.keys().hasOnly(['identificadorSorteo', 'uidUsuario', 'numeros', 'fechaRegistro'])
+        && datos.identificadorSorteo == identificadorSorteo
+        && datos.uidUsuario == uidUsuario
+        && datos.numeros is list
+        && datos.numeros.size() == 6
+        && datos.numeros.toSet().size() == 6
+        && numeroValido(datos.numeros[0])
+        && numeroValido(datos.numeros[1])
+        && numeroValido(datos.numeros[2])
+        && numeroValido(datos.numeros[3])
+        && numeroValido(datos.numeros[4])
+        && numeroValido(datos.numeros[5])
+        && datos.fechaRegistro == request.time;
+    }
+
+    match /sorteos/{identificadorSorteo} {
+      allow read: if autenticado();
+      allow write: if false;
+
+      match /bolillas/{identificadorBolilla} {
+        allow read: if autenticado();
+        allow write: if false;
+      }
+
+      match /jugadas/{uidUsuario} {
+        allow read: if autenticado() && request.auth.uid == uidUsuario;
+        allow create: if autenticado()
+          && request.auth.uid == uidUsuario
+          && get(/databases/$(baseDatos)/documents/sorteos/$(identificadorSorteo)).data.estado == 'abierto'
+          && jugadaValida(identificadorSorteo, uidUsuario);
+        allow update, delete: if false;
+      }
+    }
+  }
+}

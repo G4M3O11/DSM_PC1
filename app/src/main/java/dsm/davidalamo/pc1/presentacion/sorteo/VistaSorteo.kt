@@ -5,42 +5,85 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dsm.davidalamo.pc1.presentacion.componentes.ContenedorVista
 import dsm.davidalamo.pc1.presentacion.componentes.FilaBolillas
+import java.text.DateFormat
 
 @Composable
-fun VistaSorteo(alVolver: () -> Unit, alSalir: () -> Unit) {
-    ContenedorVista("Sorteo", alVolver = alVolver, alSalir = alSalir) {
-        Text("Así se verá tu sorteo", style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold)
-        Text("Datos de ejemplo: no hay un sorteo en tiempo real en este MVP.")
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Bolillas de ejemplo · 3/6", style = MaterialTheme.typography.titleMedium)
-                FilaBolillas(listOf(1, 7, 14))
+fun VistaSorteo(
+    estado: EstadoVistaSorteo,
+    alReintentar: () -> Unit,
+    alVolver: () -> Unit,
+    alSalir: () -> Unit
+) {
+    ContenedorVista(
+        "Sorteo", alVolver = alVolver, alSalir = alSalir,
+        aviso = "Seguimiento en tiempo real · Firestore"
+    ) {
+        Text("Seguimiento del sorteo", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        if (estado.cargando) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            Text("Esperando datos de Firestore.")
+        }
+        estado.error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+            Text("No se puede determinar el resultado con datos inválidos o incompletos.")
+            TextButton(onClick = alReintentar) { Text("Reintentar conexión") }
+        }
+        estado.resumen?.let { resumen ->
+            Text(resumen.sorteo.nombre, style = MaterialTheme.typography.titleLarge)
+            Text("Sorteo: ${resumen.sorteo.identificador} · ${DateFormat.getDateTimeInstance().format(resumen.sorteo.fecha)}")
+            Text(resumen.mensajeEstado, color = MaterialTheme.colorScheme.primary)
+            if (!resumen.datosConfirmados) {
+                Text("Datos guardados o pendientes de confirmación. Esperando conexión con Firestore.",
+                    color = MaterialTheme.colorScheme.error)
+            }
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text("Bolillas publicadas: ${resumen.bolillas.size} de 6",
+                        style = MaterialTheme.typography.titleMedium)
+                    FilaBolillas(resumen.bolillas.map { it.numero })
+                    Text("En orden de salida, del 1 al 6.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+            val jugada = resumen.jugada
+            if (jugada == null) {
+                Text("No tienes una jugada registrada en este sorteo.")
+            } else {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Mi jugada registrada", style = MaterialTheme.typography.titleMedium)
+                        FilaBolillas(jugada.numeros, resumen.numerosAcertados)
+                        Text("En el orden registrado. Los aciertos están resaltados.",
+                            style = MaterialTheme.typography.bodySmall)
+                        Text("Aciertos: ${resumen.cantidadAciertos} de 6",
+                            style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        if (resumen.numerosAcertados.isNotEmpty()) {
+                            Text("Números acertados: ${jugada.numeros.filter { it in resumen.numerosAcertados }.joinToString(", ")}")
+                        }
+                    }
+                }
+            }
+            resumen.resultadoFinal?.let { resultado ->
+                Card(
+                    Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                ) {
+                    Text(resultado, Modifier.padding(20.dp),
+                        style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                }
             }
         }
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Mi jugada de ejemplo", style = MaterialTheme.typography.titleMedium)
-                FilaBolillas(listOf(1, 7, 14, 22, 35, 45))
-                Text("Progreso ilustrativo: 3 de 6 aciertos · 50 %",
-                    style = MaterialTheme.typography.titleMedium)
-                LinearProgressIndicator(progress = { 0.5f }, modifier = Modifier.fillMaxWidth())
-                Text("La actualización de bolillas, los aciertos y el resultado final quedan para el siguiente MVP.",
-                    style = MaterialTheme.typography.bodySmall)
-            }
-        }
-        OutlinedButton(onClick = alVolver, modifier = Modifier.fillMaxWidth()) {
-            Text("Volver a mi jugada")
-        }
+        OutlinedButton(onClick = alVolver, modifier = Modifier.fillMaxWidth()) { Text("Volver a mi jugada") }
     }
 }
