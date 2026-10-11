@@ -27,13 +27,12 @@ fun VistaSorteo(
     alSalir: () -> Unit
 ) {
     ContenedorVista(
-        "Sorteo", alVolver = alVolver, alSalir = alSalir,
-        aviso = "Seguimiento en tiempo real · Firestore"
+        "Sorteo", alVolver = alVolver, alSalir = alSalir
     ) {
         Text("Seguimiento del sorteo", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         if (estado.cargando) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
-            Text("Esperando datos de Firestore.")
+            Text("Conectando con tu sorteo...")
         }
         estado.error?.let {
             Text(it, color = MaterialTheme.colorScheme.error)
@@ -45,7 +44,7 @@ fun VistaSorteo(
             Text("Sorteo: ${resumen.sorteo.identificador} · ${DateFormat.getDateTimeInstance().format(resumen.sorteo.fecha)}")
             Text(resumen.mensajeEstado, color = MaterialTheme.colorScheme.primary)
             if (!resumen.datosConfirmados) {
-                Text("Datos guardados o pendientes de confirmación. Esperando conexión con Firestore.",
+                Text("Datos pendientes de confirmación. Esperando conexión con el sorteo.",
                     color = MaterialTheme.colorScheme.error)
             }
             Card(Modifier.fillMaxWidth()) {
